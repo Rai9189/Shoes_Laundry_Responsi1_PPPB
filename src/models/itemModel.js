@@ -4,7 +4,7 @@ export const ItemModel = {
   // GET all items, optional filter status, always order by id ascending
   async getAll(status) {
     let query = supabase.from("items").select("*").order("id", { ascending: true });
-    if (status) query = query.eq("status", status);
+    if (status) query = query.ilike("status", status); // case-insensitive
     const { data, error } = await query;
     if (error) throw error;
     return data;
