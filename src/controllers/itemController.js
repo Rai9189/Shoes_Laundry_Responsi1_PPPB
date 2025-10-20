@@ -1,59 +1,64 @@
-import { ItemModel } from "../models/itemModel.js";
+import { supabase } from "../supabaseClient.js";
 
-export const ItemController = {
-  async getAll(req, res) {
-    try {
-      const { status } = req.query;
-      const items = await ItemModel.getAll(status);
-      res.json(items);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
+export const ItemModel = {
+  // Ambil semua data atau filter berdasarkan status
+  async getAll(status) {
+    let query = supabase.from("items").select("*");
+
+    if (status) {
+      // Gunakan ilike agar tidak case-sensitive
+      query = query.ilike("status", status);
     }
+
+    const { data, error } = await query;
+    if (error) throw new Error(error.message);
+    return data;
   },
 
-  async getById(req, res) {
-    try {
-      const item = await ItemModel.getById(req.params.id);
-      res.json(item);
-    } catch (err) {
-      res.status(404).json({ error: err.message });
-    }
+  // Ambil berdasarkan id
+  async getById(id) {
+    const { data, error } = await supabase
+      .from("items")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error) throw new Error(error.message);
+    return data;
   },
 
-  async create(req, res) {
-    try {
-      const newItems = await ItemModel.create(req.body);
-      res.status(201).json(newItems);
-    } catch (err) {
-      res.status(400).json({ error: err.message });
-    }
+  // Tambah data baru
+  async create(itemData) {
+    const { data, error } = await supabase
+      .from("items")
+      .insert(itemData)
+      .select();
+
+    if (error) throw new Error(error.message);
+    return data;
   },
 
-  async update(req, res) {
-    try {
-      const updatedItem = await ItemModel.update(req.params.id, req.body);
-      res.json(updatedItem);
-    } catch (err) {
-      res.status(400).json({ error: err.message });
-    }
+  // Update data berdasarkan id
+  async update(id, itemData) {
+    const { data, error } = await supabase
+      .from("items")
+      .update(itemData)
+      .eq("id", id)
+      .select();
+
+    if (error) throw new Error(error.message);
+    return data;
   },
 
-  async remove(req, res) {
-    try {
-      await ItemModel.remove(req.params.id);
-      res.json({ message: "Deleted successfully" });
-    } catch (err) {
-      res.status(400).json({ error: err.message });
-    }
+  // Hapus satu item berdasarkan id
+  async remove(id) {
+    const { error } = await supabase.from("items").delete().eq("id", id);
+    if (error) throw new Error(error.message);
   },
 
-  async removeMany(req, res) {
-    try {
-      const ids = req.body; // expect array of ids
-      await ItemModel.removeMany(ids);
-      res.json({ message: "Deleted successfully" });
-    } catch (err) {
-      res.status(400).json({ error: err.message });
-    }
-  }
+  // Hapus banyak item sekaligus
+  async removeMany(ids) {
+    const { error } = await supabase.from("items").delete().in("id", ids);
+    if (error) throw new Error(error.message);
+  },
 };
