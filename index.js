@@ -10,10 +10,10 @@ app.use(express.json());
 app.get("/", (req, res) => {
   res.send(`
     Selamat datang di Shoes Laundry API! Gunakan route /items untuk CRUD.<br><br>
-    Nama     : Rafi Rai Pasha Afandi<br>
-    NIM      : 21120123130073<br>
+    Nama : Rafi Rai Pasha Afandi<br>
+    NIM : 21120123130073<br>
     Kelompok : 19<br>
-    Shift    : 1
+    Shift : 1
   `);
 });
 
